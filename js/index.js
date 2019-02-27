@@ -133,8 +133,8 @@ const createValueSlider = (value) => {
 
     let slider = document.createElement('input');
     slider.type = 'range';
-    slider.max = '5';
-    slider.min = '-5';
+    slider.max = '1';
+    slider.min = '-1';
     slider.value = '0';
     slider.step = '0.05';
 
@@ -290,78 +290,82 @@ const saveTagging = () => {
     console.log(selectedValues);
     console.log(nameList);
 
+
+    // saves the data
     if(nameList[chosenWord]) {
+        console.log('exists in DB');
 
         let previousReviews = nameList[chosenWord].reviews;
 
-        // let newValues = nameList[chosenWord].values.forEach()
-        console.log(nameList[chosenWord].values);
-        // nameList
-        nameList[chosenWord].values =
+        let wordData = nameList[chosenWord];
 
-        nameList[chosenWord].reviews += 1;
+        // if there's values already logged, multiply them by
+        // the # of reviews that have been made previously
+        if(wordData.values) {
+            Object.keys(wordData.values).forEach((value) => {
+                wordData.values[value] = wordData.values[value] * previousReviews;
+            })
+        }
+
+        // increments reviews to include the current one
+        wordData.reviews += 1;
+
+        // values are added to wordData
+        Object.keys(selectedValues).forEach((value) => {
+            // TODO : FIX BUG HERE
+            // basically, this isn't properly saving the value to the wordData object 😠
+            console.log(wordData);
+            wordData.values[value] += selectedValues[value];
+
+        });
+
+        // values are divided by the number of total reviews
+        if(wordData.values) {
+            Object.keys(wordData.values).forEach((value) => {
+                wordData.values[value] = Math.round((wordData.values[value] / wordData.reviews) * 100 ) /100;
+            })
+        }
+
+        // updates local data
+        nameList[chosenWord] = wordData;
+
+        //updates the record of the word to the DB
+        database.ref().child('names').child(chosenWord).set(nameList[chosenWord]);
 
     }
     else {
+        console.log('new entry');
+
+        // updates the data for the word locally
         nameList[chosenWord] = {
             'reviews' : 1,
             'values' : selectedValues
-        }
+        };
+
+        console.log(nameList[chosenWord]);
+
+        //updates the record of the word to the DB
+        database.ref().child('names').child(chosenWord).set(nameList[chosenWord]);
     }
 
 
-    return;
-
+    // disables activate button
     generateButton.classList.add('disabled');
-    let nameScore = [];
 
-    // loops through all names
-    for(let name in nameList) {
-        //adds each name to the score
-        let entry = [name, 0];
-
-        // loops through each value for a given name
-        for(let value in nameList[name].values) {
-
-            // Each name has a score associated to each of its values.
-            // This score is multiplied by the selected values (where applicable)
-            // then added together to make the score.
-            if(selectedValues[value]) {
-                entry[1] += (nameList[name].values[value] * selectedValues[value]);
-            }
-        }
-
-        nameScore.push(entry);
-    }
-
-
-    nameScore.sort((a,b) => {
-        return b[1] - a[1];
-    });
-
-
-    let bestName = nameScore[0][0];
-
-
+    // opens the furnace door
     let outputFrame = document.querySelector('.output-frame');
     outputFrame.classList.add('open');
-
-    // removes old results
-    Array.from(document.querySelectorAll('.result')).forEach((result) => {
-        if(result) {
-
-        }
-    });
 
     // puts names into the DOM
     let result = document.createElement('h5');
     result.classList.add('result');
-    result.innerHTML = bestName;
+    result.innerHTML = chosenWord;
     result.style.opacity = '0';
 
 
     nameOutput.appendChild(result);
 
+    // pushes the word on the conveyor then into the trapdoor
     setTimeout(() => {
         result.style.opacity = '1';
         result.style.transition = 'all 1.55s linear';
@@ -401,11 +405,17 @@ const saveTagging = () => {
     }, 350);
 
 
-
+    // animates the button
     generateButton.classList.add('activated');
     setTimeout(() => {
         generateButton.classList.remove('activated');
-    }, 850)
+    }, 850);
+
+
+    // TODO: VERY IMPORTANT! ⚠️️️️⚠️️️️⚠️️️️⚠️️️️⚠️️️️ Clear the data ⚠️️️️⚠️️️️⚠️️️️⚠️️️️⚠️️️️
+    // clears data for the next word
+    selectedValues = null;
+
 
 };
 
@@ -508,7 +518,7 @@ let disperseParticles = (parent, area) => {
          joint.appendChild(bolt.cloneNode(true));
 
          pipes.forEach((pipe) => {
-             let quantity = Math.ceil(Math.random() * 3)
+             let quantity = Math.ceil(Math.random() * 3);
 
              for (let i = 0; i < quantity; i++) {
                  pipe.appendChild(joint.cloneNode(true));
@@ -542,9 +552,6 @@ document.addEventListener('DOMContentLoaded', (event) => {
             // }
 
         });
-
-
-
 
 });
 
