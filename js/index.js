@@ -225,10 +225,10 @@ const calculateScroll = () => {
 // picks the name with the smallest number of reviews to give it priority to be ranked
 // also sets the value of the
 const pickName = () => {
-    chosenWord = Object.values(nameList)[0];
+    chosenWord = Object.keys(nameList)[0];
 
     Object.keys(nameList).forEach((name) => {
-            if (chosenWord.reviews > nameList[name].reviews) {
+            if (nameList[chosenWord].reviews > nameList[name].reviews) {
                 chosenWord = name;
             }
     });
@@ -286,14 +286,9 @@ const generateValues = () => {
 // generates a list of names based on the values chosen
 const saveTagging = () => {
 
-    console.log(chosenWord);
-    console.log(selectedValues);
-    console.log(nameList);
-
 
     // saves the data
     if(nameList[chosenWord]) {
-        console.log('exists in DB');
 
         let previousReviews = nameList[chosenWord].reviews;
 
@@ -310,14 +305,22 @@ const saveTagging = () => {
         // increments reviews to include the current one
         wordData.reviews += 1;
 
+        // if there's no values object for the word yet, create it.
+        if(!wordData.values) {
+            wordData.values = {};
+        }
+
+
         // values are added to wordData
         Object.keys(selectedValues).forEach((value) => {
-            // TODO : FIX BUG HERE
             // basically, this isn't properly saving the value to the wordData object 😠
-            console.log(wordData);
-            wordData.values[value] += selectedValues[value];
-
+            // can't perform operations on value with nothing in it, so it needs to be initialised to 0 if empty
+            if (!wordData.values[value]) {
+                wordData.values[value] = 0;
+            }
+            wordData.values[value] = selectedValues[value] + wordData.values[value];
         });
+
 
         // values are divided by the number of total reviews
         if(wordData.values) {
@@ -334,7 +337,6 @@ const saveTagging = () => {
 
     }
     else {
-        console.log('new entry');
 
         // updates the data for the word locally
         nameList[chosenWord] = {
@@ -342,7 +344,6 @@ const saveTagging = () => {
             'values' : selectedValues
         };
 
-        console.log(nameList[chosenWord]);
 
         //updates the record of the word to the DB
         database.ref().child('names').child(chosenWord).set(nameList[chosenWord]);
@@ -412,7 +413,8 @@ const saveTagging = () => {
     }, 850);
 
 
-    // TODO: VERY IMPORTANT! ⚠️️️️⚠️️️️⚠️️️️⚠️️️️⚠️️️️ Clear the data ⚠️️️️⚠️️️️⚠️️️️⚠️️️️⚠️️️️
+    // BUG TODO: VERY IMPORTANT! ⚠️️️️⚠️️️️⚠️️️️⚠️️️️⚠️️️️ Clear the data ⚠️️️️⚠️️️️⚠️️️️⚠️️️️⚠️️️️
+    //
     // clears data for the next word
     selectedValues = null;
 
