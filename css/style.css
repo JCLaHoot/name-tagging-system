@@ -274,6 +274,7 @@ body {
     /*flex-wrap: wrap;*/
     width: 100%;
     height: auto;
+    min-height: 4em;
     overflow: scroll;
     padding: 0.5em 0;
 }
@@ -366,7 +367,7 @@ body {
 
 .value-selection button:focus {
     outline: none;
-    box-shadow: 0 0 0.25em 0.25em #FF5722;
+    /*box-shadow: 0 0 0.25em 0.25em #FF5722;*/
 }
 
 .value-selection button p {

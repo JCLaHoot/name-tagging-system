@@ -39,6 +39,27 @@ var database = firebase.database();
 
 //scroll controls
 
+// Scroll helpers for the values list. Shows + hides the scroll buttons based on position of scroll
+const calculateScroll = () => {
+    let scrollPos = valueSelectionContainer.scrollLeft;
+    let maxWidth = valueSelectionContainer.scrollWidth - valueSelectionContainer.clientWidth;
+
+    if(scrollPos > 10) {
+        leftScroll.style.visibility = 'visible';
+    }
+    else {
+        leftScroll.style.visibility = 'hidden';
+    }
+
+    if (maxWidth - scrollPos < 10) {
+        rightScroll.style.visibility = 'hidden';
+    }
+    else {
+        rightScroll.style.visibility = 'visible';
+    }
+
+};
+
 
 leftScroll.addEventListener('click', ()=> {
     let scrollOptions = {
@@ -114,11 +135,11 @@ fetchJSON = () => {
 
 };
 
-
+let deleteSliderFunctions = [];
 
 //Creates a value slider, which allows you to control how important a value is for the naming.
 // Also creates labels, and allows you to erase a value.
-const createValueSlider = (value) => {
+const createValueSlider = (value, button) => {
     let container = document.createElement('div');
     container.classList.add('value-control');
 
@@ -171,7 +192,23 @@ const createValueSlider = (value) => {
         if (Object.keys(selectedValues).length === 0) {
             generateButton.classList.add('disabled')
         }
+
+        //    add the value back to the list:
+        button.style.position = null;
+        button.style.left = null;
+        button.style.top = null;
+        button.style.transition = null;
+        button.style.transform = null;
+
+
+        // removes the delete function for the array, since it was already called
+        // deleteSliderFunctions.splice(deleteSliderFunctions.indexOf(deleteValue) , 1);
+
     };
+
+    //adds the delete function to an array, so they can all be called at once
+    deleteSliderFunctions.push(deleteValue);
+
 
     let x = document.createElement("span");
     x.classList.add('fas','fa-times', 'delete');
@@ -185,40 +222,30 @@ const createValueSlider = (value) => {
 
 };
 
-const addValueToList = (event) => {
+
+// onClick event for the value selection
+const addValueToList = (button) => {
     let value = event.target.value;
     //prevents creating the same value multiple times
-    if(!selectedValues[value]) {
+    if(selectedValues[value] === undefined) {
         selectedValues[value] = 0;
-        createValueSlider(value);
+        createValueSlider(value, button);
     }
 
+    button.style.position = 'absolute';
+    button.style.left = '6.5em';
+    button.style.top = '4.5em';
+    button.style.transition = 'all 1s';
+
+    setTimeout( () => {
+        button.style.top = '8em';
+        button.style.transform = 'scale(0)'
+    }, 200);
 
     generateButton.classList.remove('disabled')
 
 };
 
-
-// Scroll helpers for the values list. Shows + hides the scroll buttons based on position of scroll
-const calculateScroll = () => {
-    let scrollPos = valueSelectionContainer.scrollLeft;
-    let maxWidth = valueSelectionContainer.scrollWidth - valueSelectionContainer.clientWidth;
-
-    if(scrollPos > 10) {
-        leftScroll.style.visibility = 'visible';
-    }
-    else {
-        leftScroll.style.visibility = 'hidden';
-    }
-
-    if (maxWidth - scrollPos < 10) {
-        rightScroll.style.visibility = 'hidden';
-    }
-    else {
-        rightScroll.style.visibility = 'visible';
-    }
-
-};
 
 
 //TODO: make this thing a promise to not have weird async stuff going on.
@@ -254,7 +281,7 @@ const generateValues = () => {
 
             button.appendChild(text);
             button.value = value;
-            button.addEventListener("click", addValueToList);
+            button.addEventListener("click", addValueToList.bind(this, button));
 
             let bolt1 = document.createElement('div');
             bolt1.classList.add('bolt', 'top-left');
@@ -413,10 +440,13 @@ const saveTagging = () => {
     }, 850);
 
 
-    // BUG TODO: VERY IMPORTANT! ⚠️️️️⚠️️️️⚠️️️️⚠️️️️⚠️️️️ Clear the data ⚠️️️️⚠️️️️⚠️️️️⚠️️️️⚠️️️️
-    //
-    // clears data for the next word
-    selectedValues = null;
+    //calls the delete functions for all of the the preselected values
+    deleteSliderFunctions.forEach((deleteFunction) => {
+        deleteFunction();
+    });
+
+    //picks a new word
+    pickName();
 
 
 };
