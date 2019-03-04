@@ -734,7 +734,7 @@ input[type=range] {
     height: 0.25em;
     width: 6em;
     /*background: #212121;*/
-    background: linear-gradient(to right, #FF5722 5% , #212121 50%,  #4CAF50 95%);
+    background: linear-gradient(to right, #03A9F4 5% , #212121 50%,  #FF5722 95%);
     /*background: red;*/
     outline: none;
     margin: 0 0.5em;
