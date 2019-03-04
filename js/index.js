@@ -165,9 +165,10 @@ const createValueSlider = (value, button) => {
 
     let interval;
 
-    interval = setInterval(()=> {
-        particleEffect(particle, particleParent, 2, 50);
-    }, 750);
+
+    // interval = setInterval(()=> {
+    //     particleEffect(particle, particleParent, 0, 50);
+    // }, 750);
 
 
     let onInput = (event) => {
@@ -175,7 +176,8 @@ const createValueSlider = (value, button) => {
 
         clearInterval(interval);
         interval = setInterval(()=> {
-            particleEffect(particle, particleParent, Math.round(event.target.value), 50);
+            // particle effect multiplied by 5 since scale is from 0-1 in the tagging machine
+            particleEffect(particle, particleParent, Math.round(event.target.value * 5), 50);
         }, 750);
     };
     slider.addEventListener("input", onInput);
