@@ -472,7 +472,7 @@ generateButton.addEventListener("click", saveTagging);
 
 
 const updateChosenName = () => {
-    let word = event.target.value;
+    let word = event.target.value.toLowerCase();
     chosenWord = word;
     chosenWordLabel.innerText = word;
 };
