@@ -256,11 +256,24 @@ const addValueToList = (button) => {
 const pickName = () => {
     chosenWord = Object.keys(nameList)[0];
 
+    //randomises words so they aren't always in the same alphabetical order
+    let leastTaggedWords = [];
+    leastTaggedWords.push(chosenWord);
+
     Object.keys(nameList).forEach((name) => {
-            if (nameList[chosenWord].reviews > nameList[name].reviews) {
-                chosenWord = name;
+            //if a name with a smaller number of reviews is found, the list is reset.
+            if (nameList[leastTaggedWords[0]].reviews > nameList[name].reviews) {
+                leastTaggedWords = [];
+                leastTaggedWords.push(name);
+            }
+            if (nameList[leastTaggedWords[0]].reviews === nameList[name].reviews) {
+                leastTaggedWords.push(name);
             }
     });
+
+    let leastTaggedWordCount = leastTaggedWords.length;
+
+    chosenWord = leastTaggedWords[Math.floor(Math.random() * leastTaggedWordCount)];
 
     chosenWordField.value = chosenWord;
     chosenWordLabel.innerText = chosenWord;
